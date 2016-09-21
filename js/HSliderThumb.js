@@ -87,6 +87,11 @@ define( function( require ) {
       enabledProperty.unlink( enabledObserver );
       options.tandem && options.tandem.removeInstance( this );
     };
+
+    this.addChild( Rectangle.bounds( this.localBounds.dilated( 5 ), {
+      fill: 'transparent',
+      pickable: false
+    } ) );
   }
 
   sun.register( 'HSliderThumb', HSliderThumb );

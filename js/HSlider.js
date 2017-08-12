@@ -9,25 +9,27 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var Emitter = require( 'AXON/Emitter' );
+  var Property = require( 'AXON/Property' );
   var Dimension2 = require( 'DOT/Dimension2' );
-  var HSliderThumb = require( 'SUN/HSliderThumb' );
-  var HSliderTrack = require( 'SUN/HSliderTrack' );
-  var inherit = require( 'PHET_CORE/inherit' );
   var LinearFunction = require( 'DOT/LinearFunction' );
+  var Util = require( 'DOT/Util' );
+  var Shape = require( 'KITE/Shape' );
+  var inherit = require( 'PHET_CORE/inherit' );
+  var StringUtils = require( 'PHETCOMMON/util/StringUtils' );
+  var Input = require( 'SCENERY/input/Input' );
+  var SimpleDragHandler = require( 'SCENERY/input/SimpleDragHandler' );
   var Node = require( 'SCENERY/nodes/Node' );
   var Path = require( 'SCENERY/nodes/Path' );
-  var Property = require( 'AXON/Property' );
-  var Shape = require( 'KITE/Shape' );
   var Rectangle = require( 'SCENERY/nodes/Rectangle' );
   var FocusOverlay = require( 'SCENERY/overlays/FocusOverlay' );
-  var StringUtils = require( 'PHETCOMMON/util/StringUtils' );
+  var HSliderThumb = require( 'SUN/HSliderThumb' );
+  var HSliderTrack = require( 'SUN/HSliderTrack' );
   var sun = require( 'SUN/sun' );
   var Tandem = require( 'TANDEM/Tandem' );
-  var SimpleDragHandler = require( 'SCENERY/input/SimpleDragHandler' );
-  var Input = require( 'SCENERY/input/Input' );
-  var Util = require( 'DOT/Util' );
 
   // phet-io modules
+  var TNumber = require( 'ifphetio!PHET_IO/types/TNumber' );
   var THSlider = require( 'SUN/THSlider' );
 
   /**
@@ -108,6 +110,14 @@ define( function( require ) {
     this.enabledProperty = options.enabledProperty;
     this.enabledRangeProperty = options.enabledRangeProperty;
 
+    // @public (phet-io) - signify when the keyboard input has been processed. This is used internally to change the
+    // valueProperty and also used for PhET-iO so that clients can listen observe keys processed by this slider, and it
+    // will appear nested in the data stream.
+    this.keydownEmitter = new Emitter( {
+      tandem: options.tandem.createTandem( 'keydownEmitter' ),
+      phetioArgumentTypes: [ TNumber(), TNumber(), TNumber() ]
+    } );
+
     // @private options needed by prototype functions that add ticks
     this.tickOptions = _.pick( options, 'tickLabelSpacing',
       'majorTickLength', 'majorTickStroke', 'majorTickLineWidth',
@@ -167,16 +177,16 @@ define( function( require ) {
     // The thumb of the slider
     var thumb = options.thumbNode || new HSliderThumb( this.enabledProperty, {
 
-        // propagate options that are specific to HSliderThumb
-        size: options.thumbSize,
-        fillEnabled: options.thumbFillEnabled,
-        fillHighlighted: options.thumbFillHighlighted,
-        fillDisabled: options.thumbFillDisabled,
-        stroke: options.thumbStroke,
-        lineWidth: options.thumbLineWidth,
-        centerLineStroke: options.thumbCenterLineStroke,
-        tandem: options.tandem.createTandem( 'thumb' )
-      } );
+      // propagate options that are specific to HSliderThumb
+      size: options.thumbSize,
+      fillEnabled: options.thumbFillEnabled,
+      fillHighlighted: options.thumbFillHighlighted,
+      fillDisabled: options.thumbFillDisabled,
+      stroke: options.thumbStroke,
+      lineWidth: options.thumbLineWidth,
+      centerLineStroke: options.thumbCenterLineStroke,
+      tandem: options.tandem.createTandem( 'thumb' )
+    } );
 
     // Dilate the local bounds horizontally so that it extends beyond where the thumb can reach.  This prevents layout
     // asymmetry when the slider thumb is off the edges of the track.  See https://github.com/phetsims/sun/issues/282
@@ -329,7 +339,6 @@ define( function( require ) {
 
               // if the shift key is pressed down, modify the step size (this is atypical browser behavior for sliders)
               stepSize = event.shiftKey ? self.shiftKeyboardStep : self.keyboardStep;
-              // 
 
               if ( code === Input.KEY_RIGHT_ARROW || code === Input.KEY_UP_ARROW ) {
                 newValue = valueProperty.get() + stepSize;
@@ -352,12 +361,20 @@ define( function( require ) {
             newValue = Util.clamp( newValue, self.enabledRange.min, self.enabledRange.max );
           }
 
-          // optionally constrain the value further
-          valueProperty.set( options.constrainValue( newValue ) );
+          // Optionally constrain the value further
+          var constrainedValue = options.constrainValue( newValue );
+
+          // Send the new value over the emitter
+          self.keydownEmitter.emit3( event.keyCode, newValue, constrainedValue );
         }
       }
     } );
 
+    // Cascade
+    var keydownListener = function( keycode, newValue, constrainedValue ) {
+      valueProperty.set( constrainedValue );
+    };
+    this.keydownEmitter.addListener( keydownListener );
 
     // a11y - when the property changes, be sure to update the accessible input value and
     // aria-valuetext for assistive, which is read by assistive technology when the value changes
@@ -383,7 +400,7 @@ define( function( require ) {
       self.enabledProperty.unlink( enabledObserver );
       self.removeAccessibleInputListener( accessibleInputListener );
       valueProperty.unlink( accessiblePropertyListener );
-
+      self.keydownEmitter.removeListener( keydownListener );
       thumbInputListener.dispose();
     };
   }

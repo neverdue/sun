@@ -356,16 +356,19 @@ define( function( require ) {
                 newValue += ( newValue > valueProperty.get() ) ? ( -1 * stepSize ) : stepSize;
               }
             }
-
-            // limit the value to the enabled range
-            newValue = Util.clamp( newValue, self.enabledRange.min, self.enabledRange.max );
           }
+
+          // Signify the value the user tried to reach with the keyboard (so we know if they got out of range)
+          var proposedValue = newValue;
+
+          // limit the value to the enabled range
+          newValue = Util.clamp( newValue, self.enabledRange.min, self.enabledRange.max );
 
           // Optionally constrain the value further
           var constrainedValue = options.constrainValue( newValue );
 
           // Send the new value over the emitter
-          self.keydownEmitter.emit3( event.keyCode, newValue, constrainedValue );
+          self.keydownEmitter.emit3( event.keyCode, proposedValue, constrainedValue );
         }
       }
     } );

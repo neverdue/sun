@@ -17,15 +17,21 @@ define( require => {
   const FontAwesomeNode = require( 'SUN/FontAwesomeNode' );
   const inherit = require( 'PHET_CORE/inherit' );
   const InstanceRegistry = require( 'PHET_CORE/documentation/InstanceRegistry' );
+  const PropertyMultiClip = require( 'TAMBO/sound-generators/PropertyMultiClip' );
   const Node = require( 'SCENERY/nodes/Node' );
   const PhetioObject = require( 'TANDEM/PhetioObject' );
   const Rectangle = require( 'SCENERY/nodes/Rectangle' );
+  const soundManager = require( 'TAMBO/soundManager' );
   const sun = require( 'SUN/sun' );
   const SunConstants = require( 'SUN/SunConstants' );
   const Tandem = require( 'TANDEM/Tandem' );
 
   // constants
   const ENABLED_PROPERTY_TANDEM_NAME = 'enabledProperty';
+
+  // sounds
+  const checkboxChecked = require( 'sound!TAMBO/check-box-checked.mp3' );
+  const checkboxUnchecked = require( 'sound!TAMBO/check-box-unchecked.mp3' );
 
   /**
    * @param {Node} content
@@ -128,6 +134,19 @@ define( require => {
     };
     property.link( checkboxCheckedListener );
 
+    // sound generation
+    const checkboxSoundGenerator = new PropertyMultiClip(
+      property,
+      [
+        { value: true, soundInfo: checkboxChecked },
+        { value: false, soundInfo: checkboxUnchecked }
+      ],
+      {
+        initialOutputLevel: 0.7
+      }
+    );
+    soundManager.addSoundGenerator( checkboxSoundGenerator );
+
     // Apply additional options
     this.mutate( options );
 
@@ -204,6 +223,10 @@ define( require => {
         // Client owns enabledProperty, remove the listener that we added.
         self.enabledProperty.unlink( enabledListener );
       }
+
+      // Unhook the sound generator and dispose it.
+      soundManager.removeSoundGenerator( checkboxSoundGenerator );
+      checkboxSoundGenerator.dispose();
 
       // Private to Checkbox, but we need to clean up tandem.
       toggleAction.dispose();

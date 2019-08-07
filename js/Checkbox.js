@@ -59,6 +59,8 @@ define( require => {
       phetioLinkProperty: true, // whether a link to the checkbox's Property is created
       phetioComponentOptions: null, // filled in below with PhetioObject.mergePhetioComponentOptions()
 
+      // TODO: sound options
+
       // a11y
       tagName: 'input',
       inputType: 'checkbox',

@@ -63,6 +63,9 @@ define( require => {
       buttonAppearanceStrategy: RadioButtonGroupAppearance.defaultRadioButtonsAppearance,
       contentAppearanceStrategy: RadioButtonGroupAppearance.contentAppearanceStrategy,
 
+      // The sound generation will be handled in the parent group type, so disable the default.
+      soundGenerationStrategy: null,
+
       // a11y
       tagName: 'input',
       inputType: 'radio',

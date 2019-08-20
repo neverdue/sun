@@ -592,9 +592,9 @@ define( require => {
       }
     };
 
-    buttonModel.downProperty.link( playFiredSound );
+    buttonModel.downProperty.lazyLink( playFiredSound );
 
-    // define a dispose function that wlll get rid of resources and thus avoid memory leaks
+    // dispose function
     this.dispose = function() {
       buttonModel.firedEmitter.removeListener( playFiredSound );
       soundManager.removeSoundGenerator( soundClip );

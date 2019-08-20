@@ -23,6 +23,8 @@ define( function( require ) {
   var Path = require( 'SCENERY/nodes/Path' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
   var Shape = require( 'KITE/Shape' );
+  var SoundClip = require( 'TAMBO/sound-generators/SoundClip' );
+  var soundManager = require( 'TAMBO/soundManager' );
   var sun = require( 'SUN/sun' );
   var Tandem = require( 'TANDEM/Tandem' );
 
@@ -33,6 +35,9 @@ define( function( require ) {
   var DEFAULT_COLOR = ColorConstants.LIGHT_BLUE;
   var X_ALIGN_VALUES = [ 'center', 'left', 'right' ];
   var Y_ALIGN_VALUES = [ 'center', 'top', 'bottom' ];
+
+  // sounds
+  const defaultButtonSound = require( 'sound!TAMBO/general-button-v4.mp3' );
 
   /**
    * @param {ButtonModel} buttonModel - Model that defines the button's behavior.
@@ -93,6 +98,10 @@ define( function( require ) {
       // or custom.  To create a custom one, model it off of the stock
       // version(s) defined in this file.
       contentAppearanceStrategy: RectangularButtonView.FadeContentWhenDisabled,
+
+      // {Object|null} Strategy for playing a sound when the button fires, null indicates that no sound generation
+      // should occur.  Please see the default in order to understand the API for this strategy object.
+      soundGenerationStrategy: RectangularButtonView.DefaultButtonSoundStrategy,
 
       // Options that will be passed through to the main input listener (PressListener)
       listenerOptions: null,
@@ -175,6 +184,11 @@ define( function( require ) {
     // Hook up the strategy that will control the content appearance.
     var contentAppearanceStrategy = new options.contentAppearanceStrategy( content, interactionStateProperty, options );
 
+    // Hook up the strategy that will produce the sound.
+    if ( options.soundGenerationStrategy ) {
+      var soundGenerationStrategy = new options.soundGenerationStrategy( buttonModel, options.fireOnDown );
+    }
+
     // Control the pointer state based on the interaction state.
     // Control the pointer state based on the interaction state.
     var self = this;
@@ -202,6 +216,7 @@ define( function( require ) {
     this.disposeRectangularButtonView = function() {
       buttonAppearanceStrategy.dispose();
       contentAppearanceStrategy.dispose();
+      soundGenerationStrategy && soundGenerationStrategy.dispose();
       this.baseColorProperty.dispose();
       this._pressListener.dispose();
       if ( interactionStateProperty.hasListener( handleInteractionStateChanged ) ) {
@@ -556,6 +571,33 @@ define( function( require ) {
       if ( interactionStateProperty.hasListener( updateOpacity ) ) {
         interactionStateProperty.unlink( updateOpacity );
       }
+    };
+  };
+
+  /**
+   * basic strategy for producing sound when the button is pressed
+   * @param {ButtonModel} buttonModel
+   * @param {boolean} fireOnDown
+   * @constructor
+   * @public
+   */
+  RectangularButtonView.DefaultButtonSoundStrategy = function( buttonModel, fireOnDown ) {
+
+    var soundClip = new SoundClip( defaultButtonSound, { initialOutputLevel: 0.7 } );
+    soundManager.addSoundGenerator( soundClip );
+
+    var playFiredSound = function( down ) {
+      if ( down && fireOnDown || !down && !fireOnDown ) {
+        soundClip.play();
+      }
+    };
+
+    buttonModel.downProperty.link( playFiredSound );
+
+    // define a dispose function that wlll get rid of resources and thus avoid memory leaks
+    this.dispose = function() {
+      buttonModel.firedEmitter.removeListener( playFiredSound );
+      soundManager.removeSoundGenerator( soundClip );
     };
   };
 

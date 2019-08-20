@@ -27,6 +27,8 @@ define( function( require ) {
   var RadioButtonGroupMember = require( 'SUN/buttons/RadioButtonGroupMember' );
   var Rectangle = require( 'SCENERY/nodes/Rectangle' );
   var Shape = require( 'KITE/Shape' );
+  var SoundClip = require( 'TAMBO/sound-generators/SoundClip' );
+  var soundManager = require( 'TAMBO/soundManager' );
   var sun = require( 'SUN/sun' );
   var Tandem = require( 'TANDEM/Tandem' );
 
@@ -34,6 +36,9 @@ define( function( require ) {
   var BUTTON_CONTENT_X_ALIGN_VALUES = [ 'center', 'left', 'right' ];
   var BUTTON_CONTENT_Y_ALIGN_VALUES = [ 'center', 'top', 'bottom' ];
   var CLASS_NAME = 'RadioButtonGroup'; // to prefix instanceCount in case there are different kinds of "groups"
+
+  // sounds
+  var radioButtonSound = require( 'sound!TAMBO/radio-button-v2.mp3' );
 
   // a11y - Unique ID for each instance if RadioButtonGroup, passed to individual buttons in the group. All buttons in
   // the  radio button group must have the same name or else the browser will treat all inputs of type radio in the
@@ -287,6 +292,18 @@ define( function( require ) {
       radioButton.setFocusHighlight( Shape.bounds( highlightBounds ) );
 
       buttons.push( button );
+
+      // produce a sound when the button fires
+      ( function() {
+        var thisButtonIndex = buttons.indexOf( button );
+        radioButton.firedEmitter.addListener( function() {
+
+          // calculate a playback rate that starts from the natural frequency of the sound and goes down by whole tones
+          var playbackRate = Math.pow( 2, -thisButtonIndex / 12 );
+          self.radioButtonSoundClip.setPlaybackRate( playbackRate );
+          self.radioButtonSoundClip.play();
+        } );
+      } )();
     }
 
     // @private
@@ -296,6 +313,10 @@ define( function( require ) {
     options.children = buttons;
     LayoutBox.call( this, options );
     var self = this;
+
+    // create and register the sound that will be played when the buttons are pressed
+    this.radioButtonSoundClip = new SoundClip( radioButtonSound, { initialOutputLevel: 0.7 } );
+    soundManager.addSoundGenerator( this.radioButtonSoundClip );
 
     // a11y - this node's primary sibling is aria-labelledby its own label so the label content is read whenever
     // a member of the group receives focus
@@ -348,6 +369,9 @@ define( function( require ) {
       for ( i = 0; i < contentArray.length; i++ ) {
         buttons[ i ].dispose();
       }
+
+      // de-register the sound generator
+      soundManager.addSoundGenerator( this.radioButtonSoundClip );
     };
 
     // a11y - register component for binder docs

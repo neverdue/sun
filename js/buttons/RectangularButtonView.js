@@ -22,9 +22,8 @@ define( function( require ) {
   var PaintColorProperty = require( 'SCENERY/util/PaintColorProperty' );
   var Path = require( 'SCENERY/nodes/Path' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
+  var pushButtonSoundPlayer = require( 'TAMBO/pushButtonSoundPlayer' );
   var Shape = require( 'KITE/Shape' );
-  var SoundClip = require( 'TAMBO/sound-generators/SoundClip' );
-  var soundManager = require( 'TAMBO/soundManager' );
   var sun = require( 'SUN/sun' );
   var Tandem = require( 'TANDEM/Tandem' );
 
@@ -35,9 +34,6 @@ define( function( require ) {
   var DEFAULT_COLOR = ColorConstants.LIGHT_BLUE;
   var X_ALIGN_VALUES = [ 'center', 'left', 'right' ];
   var Y_ALIGN_VALUES = [ 'center', 'top', 'bottom' ];
-
-  // sounds
-  const defaultButtonSound = require( 'sound!TAMBO/general-button-v4.mp3' );
 
   /**
    * @param {ButtonModel} buttonModel - Model that defines the button's behavior.
@@ -583,12 +579,11 @@ define( function( require ) {
    */
   RectangularButtonView.DefaultButtonSoundStrategy = function( buttonModel, fireOnDown ) {
 
-    var soundClip = new SoundClip( defaultButtonSound, { initialOutputLevel: 0.7 } );
-    soundManager.addSoundGenerator( soundClip );
+    const buttonSoundPlayer = pushButtonSoundPlayer.getInstance();
 
     var playFiredSound = function( down ) {
       if ( down && fireOnDown || !down && !fireOnDown ) {
-        soundClip.play();
+        buttonSoundPlayer.play();
       }
     };
 
@@ -597,7 +592,6 @@ define( function( require ) {
     // dispose function
     this.dispose = function() {
       buttonModel.firedEmitter.removeListener( playFiredSound );
-      soundManager.removeSoundGenerator( soundClip );
     };
   };
 

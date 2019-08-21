@@ -23,8 +23,6 @@ define( require => {
   const Path = require( 'SCENERY/nodes/Path' );
   const PhetioObject = require( 'TANDEM/PhetioObject' );
   const Shape = require( 'KITE/Shape' );
-  const SoundClip = require( 'TAMBO/sound-generators/SoundClip' );
-  const soundManager = require( 'TAMBO/soundManager' );
   const sun = require( 'SUN/sun' );
   const Tandem = require( 'TANDEM/Tandem' );
 
@@ -35,9 +33,6 @@ define( require => {
   const DEFAULT_COLOR = ColorConstants.LIGHT_BLUE;
   const X_ALIGN_VALUES = [ 'center', 'left', 'right' ];
   const Y_ALIGN_VALUES = [ 'center', 'top', 'bottom' ];
-
-  // sounds
-  const defaultButtonSound = require( 'sound!TAMBO/general-button-v4.mp3' );
 
   /**
    * @param {ButtonModel} buttonModel - Model that defines the button's behavior.
@@ -583,12 +578,11 @@ define( require => {
    */
   RectangularButtonView.DefaultButtonSoundStrategy = function( buttonModel, fireOnDown ) {
 
-    var soundClip = new SoundClip( defaultButtonSound, { initialOutputLevel: 0.7 } );
-    soundManager.addSoundGenerator( soundClip );
+    const buttonSoundPlayer = pushButtonSoundPlayer.getInstance();
 
     var playFiredSound = function( down ) {
       if ( down && fireOnDown || !down && !fireOnDown ) {
-        soundClip.play();
+        buttonSoundPlayer.play();
       }
     };
 
@@ -597,7 +591,6 @@ define( require => {
     // dispose function
     this.dispose = function() {
       buttonModel.firedEmitter.removeListener( playFiredSound );
-      soundManager.removeSoundGenerator( soundClip );
     };
   };
 

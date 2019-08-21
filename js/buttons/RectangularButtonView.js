@@ -180,12 +180,11 @@ define( function( require ) {
     // Hook up the strategy that will control the content appearance.
     var contentAppearanceStrategy = new options.contentAppearanceStrategy( content, interactionStateProperty, options );
 
-    // Hook up the strategy that will produce the sound.
+    // Hook up the strategy that will produce the sound (if there is one).
     if ( options.soundGenerationStrategy ) {
       var soundGenerationStrategy = new options.soundGenerationStrategy( buttonModel, options.fireOnDown );
     }
 
-    // Control the pointer state based on the interaction state.
     // Control the pointer state based on the interaction state.
     var self = this;
 

@@ -17,6 +17,7 @@ define( function( require ) {
   var ButtonInteractionState = require( 'SUN/buttons/ButtonInteractionState' );
   var Circle = require( 'SCENERY/nodes/Circle' );
   var ColorConstants = require( 'SUN/ColorConstants' );
+  var commonSoundPlayers = require( 'TAMBO/commonSoundPlayers' );
   var DerivedProperty = require( 'AXON/DerivedProperty' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Node = require( 'SCENERY/nodes/Node' );
@@ -83,6 +84,10 @@ define( function( require ) {
       // version(s) defined in this file.
       contentAppearanceStrategy: RoundButtonView.FadeContentWhenDisabled,
 
+      // {Object|null} Strategy for playing a sound when the button fires, null indicates that no sound generation
+      // should occur.  Please see the default in order to understand the API for this strategy object.
+      soundGenerationStrategy: RoundButtonView.DefaultButtonSoundStrategy,
+
       // Options that will be passed through to the main input listener (PressListener)
       listenerOptions: null,
 
@@ -144,6 +149,11 @@ define( function( require ) {
     // Hook up the strategy that will control the content appearance.
     var contentAppearanceStrategy = new options.contentAppearanceStrategy( content, interactionStateProperty );
 
+    // Hook up the strategy that will produce the sound (if there is one).
+    if ( options.soundGenerationStrategy ) {
+      var soundGenerationStrategy = new options.soundGenerationStrategy( pushButtonModel, options.fireOnDown );
+    }
+
     // Control the pointer state based on the interaction state.
     var self = this;
 
@@ -174,6 +184,7 @@ define( function( require ) {
     this.disposeRoundButtonView = function() {
       buttonAppearanceStrategy.dispose();
       contentAppearanceStrategy.dispose();
+      soundGenerationStrategy.dispose();
       pressListener.dispose();
       if ( interactionStateProperty.hasListener( handleInteractionStateChanged ) ) {
         interactionStateProperty.unlink( handleInteractionStateChanged );
@@ -480,6 +491,31 @@ define( function( require ) {
       if ( interactionStateProperty.hasListener( updateOpacity ) ) {
         interactionStateProperty.unlink( updateOpacity );
       }
+    };
+  };
+
+  /**
+   * basic strategy for producing sound when the button is pressed
+   * @param {ButtonModel} buttonModel
+   * @param {boolean} fireOnDown
+   * @constructor
+   * @public
+   */
+  RoundButtonView.DefaultButtonSoundStrategy = function( buttonModel, fireOnDown ) {
+
+    const pushButtonSoundPlayer = commonSoundPlayers.pushButtonSoundPlayer;
+
+    var playFiredSound = function( down ) {
+      if ( down && fireOnDown || !down && !fireOnDown ) {
+        pushButtonSoundPlayer.play();
+      }
+    };
+
+    buttonModel.downProperty.lazyLink( playFiredSound );
+
+    // dispose function
+    this.dispose = function() {
+      buttonModel.downProperty.unlink( playFiredSound );
     };
   };
 

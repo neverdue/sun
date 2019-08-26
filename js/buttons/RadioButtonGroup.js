@@ -25,6 +25,7 @@ define( require => {
   const Property = require( 'AXON/Property' );
   const RadioButtonGroupAppearance = require( 'SUN/buttons/RadioButtonGroupAppearance' );
   const RadioButtonGroupMember = require( 'SUN/buttons/RadioButtonGroupMember' );
+  const radioButtonSoundPlayerFactory = require( 'TAMBO/radioButtonSoundPlayerFactory' );
   const Rectangle = require( 'SCENERY/nodes/Rectangle' );
   const Shape = require( 'KITE/Shape' );
   const SoundClip = require( 'TAMBO/sound-generators/SoundClip' );

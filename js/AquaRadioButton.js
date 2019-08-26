@@ -15,6 +15,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var InstanceRegistry = require( 'PHET_CORE/documentation/InstanceRegistry' );
   var Node = require( 'SCENERY/nodes/Node' );
+  var radioButtonSoundPlayerFactory = require( 'TAMBO/radioButtonSoundPlayerFactory' );
   var Rectangle = require( 'SCENERY/nodes/Rectangle' );
   var sun = require( 'SUN/sun' );
   var SunConstants = require( 'SUN/SunConstants' );
@@ -41,6 +42,10 @@ define( function( require ) {
       radius: DEFAULT_RADIUS, // radius of the button
       xSpacing: 8, // horizontal space between the button and the node
       stroke: 'black', // color used to stroke the outer edge of the button
+
+      // {Object|null} - a sound player, which is an object with a "play()" method for producing sound, or null if no
+      // sound production is desired
+      soundPlayer: radioButtonSoundPlayerFactory.getRadioButtonSoundPlayer( 0 ),
 
       // phet-io
       tandem: Tandem.required,
@@ -114,6 +119,11 @@ define( function( require ) {
     // set property value on fire
     var fire = function() {
       property.set( value );
+
+      // play sound if so configured
+      if ( options.soundPlayer ) {
+        options.soundPlayer.play();
+      }
     };
     var inputListener = new FireListener( {
       fire: fire,

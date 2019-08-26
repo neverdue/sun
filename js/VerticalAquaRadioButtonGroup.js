@@ -13,9 +13,11 @@ define( require => {
   const AquaRadioButton = require( 'SUN/AquaRadioButton' );
   const HStrut = require( 'SCENERY/nodes/HStrut' );
   const Node = require( 'SCENERY/nodes/Node' );
+  const radioButtonSoundPlayerFactory = require( 'TAMBO/radioButtonSoundPlayerFactory' );
   const sun = require( 'SUN/sun' );
   const Tandem = require( 'TANDEM/Tandem' );
   const VBox = require( 'SCENERY/nodes/VBox' );
+
 
   // a11y - An id for each instance of VerticalAquaRadioButtonGroup, passed to individual buttons in the group.
   // Each button in a radio button group must have the same "name" attribute to be considered in a group, otherwise
@@ -81,6 +83,7 @@ define( require => {
           _.extend( {}, options.radioButtonOptions, {
             tandem: item.tandemName ? options.tandem.createTandem( item.tandemName ) : Tandem.required,
             labelContent: item.labelContent || null,
+            soundPlayer: radioButtonSoundPlayerFactory.getRadioButtonSoundPlayer( i ),
             a11yNameAttribute: CLASS_NAME + instanceCount
           } ) );
 

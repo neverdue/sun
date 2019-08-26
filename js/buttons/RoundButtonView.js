@@ -84,9 +84,9 @@ define( function( require ) {
       // version(s) defined in this file.
       contentAppearanceStrategy: RoundButtonView.FadeContentWhenDisabled,
 
-      // {Object|null} Strategy for playing a sound when the button fires, null indicates that no sound generation
-      // should occur.  Please see the default in order to understand the API for this strategy object.
-      soundGenerationStrategy: RoundButtonView.DefaultButtonSoundStrategy,
+      // {Object|null} A sound player, which is an object with a "play()" method for producing sound, or null if no
+      // sound production is desired
+      soundPlayer: commonSoundPlayers.pushButtonSoundPlayer,
 
       // Options that will be passed through to the main input listener (PressListener)
       listenerOptions: null,
@@ -149,9 +149,16 @@ define( function( require ) {
     // Hook up the strategy that will control the content appearance.
     var contentAppearanceStrategy = new options.contentAppearanceStrategy( content, interactionStateProperty );
 
-    // Hook up the strategy that will produce the sound (if there is one).
-    if ( options.soundGenerationStrategy ) {
-      var soundGenerationStrategy = new options.soundGenerationStrategy( pushButtonModel, options.fireOnDown );
+    // If sound production is enabled, hook it up.
+    if ( options.soundPlayer ) {
+
+      var playFiredSound = function( down ) {
+        if ( down && options.fireOnDown || !down && !options.fireOnDown ) {
+          options.soundPlayer.play();
+        }
+      };
+
+      pushButtonModel.downProperty.lazyLink( playFiredSound );
     }
 
     // Control the pointer state based on the interaction state.
@@ -184,7 +191,6 @@ define( function( require ) {
     this.disposeRoundButtonView = function() {
       buttonAppearanceStrategy.dispose();
       contentAppearanceStrategy.dispose();
-      soundGenerationStrategy.dispose();
       pressListener.dispose();
       if ( interactionStateProperty.hasListener( handleInteractionStateChanged ) ) {
         interactionStateProperty.unlink( handleInteractionStateChanged );
@@ -491,31 +497,6 @@ define( function( require ) {
       if ( interactionStateProperty.hasListener( updateOpacity ) ) {
         interactionStateProperty.unlink( updateOpacity );
       }
-    };
-  };
-
-  /**
-   * basic strategy for producing sound when the button is pressed
-   * @param {ButtonModel} buttonModel
-   * @param {boolean} fireOnDown
-   * @constructor
-   * @public
-   */
-  RoundButtonView.DefaultButtonSoundStrategy = function( buttonModel, fireOnDown ) {
-
-    const pushButtonSoundPlayer = commonSoundPlayers.pushButtonSoundPlayer;
-
-    var playFiredSound = function( down ) {
-      if ( down && fireOnDown || !down && !fireOnDown ) {
-        pushButtonSoundPlayer.play();
-      }
-    };
-
-    buttonModel.downProperty.lazyLink( playFiredSound );
-
-    // dispose function
-    this.dispose = function() {
-      buttonModel.downProperty.unlink( playFiredSound );
     };
   };
 

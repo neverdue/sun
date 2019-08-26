@@ -13,25 +13,20 @@ define( function( require ) {
   var BooleanIO = require( 'TANDEM/types/BooleanIO' );
   var BooleanProperty = require( 'AXON/BooleanProperty' );
   var ButtonListener = require( 'SCENERY/input/ButtonListener' );
+  var commonSoundPlayers = require( 'TAMBO/commonSoundPlayers' );
   var EventType = require( 'TANDEM/EventType' );
   var FontAwesomeNode = require( 'SUN/FontAwesomeNode' );
   var inherit = require( 'PHET_CORE/inherit' );
   var InstanceRegistry = require( 'PHET_CORE/documentation/InstanceRegistry' );
-  var PropertyMultiClip = require( 'TAMBO/sound-generators/PropertyMultiClip' );
   var Node = require( 'SCENERY/nodes/Node' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
   var Rectangle = require( 'SCENERY/nodes/Rectangle' );
-  var soundManager = require( 'TAMBO/soundManager' );
   var sun = require( 'SUN/sun' );
   var SunConstants = require( 'SUN/SunConstants' );
   var Tandem = require( 'TANDEM/Tandem' );
 
   // constants
   const ENABLED_PROPERTY_TANDEM_NAME = 'enabledProperty';
-
-  // sounds
-  const checkboxChecked = require( 'sound!TAMBO/check-box-checked.mp3' );
-  const checkboxUnchecked = require( 'sound!TAMBO/check-box-unchecked.mp3' );
 
   /**
    * @param {Node} content
@@ -59,7 +54,9 @@ define( function( require ) {
       phetioLinkProperty: true, // whether a link to the checkbox's Property is created
       phetioComponentOptions: null, // filled in below with PhetioObject.mergePhetioComponentOptions()
 
-      // TODO: sound options
+      // sound options, can replace with a custom sound player or set to null to disable sound production
+      checkedSoundPlayer: commonSoundPlayers.checkboxCheckedSoundPlayer,
+      uncheckedSoundPlayer: commonSoundPlayers.checkboxUncheckedSoundPlayer,
 
       // a11y
       tagName: 'input',
@@ -123,6 +120,12 @@ define( function( require ) {
         if ( self.enabledProperty.value ) {
           var newValue = !property.value;
           toggleAction.execute( newValue );
+          if ( newValue === true && options.checkedSoundPlayer ) {
+            options.checkedSoundPlayer.play();
+          }
+          else if ( newValue === false && options.uncheckedSoundPlayer ) {
+            options.uncheckedSoundPlayer.play();
+          }
         }
       }
     } );
@@ -135,19 +138,6 @@ define( function( require ) {
       self.accessibleChecked = checked;
     };
     property.link( checkboxCheckedListener );
-
-    // sound generation
-    const checkboxSoundGenerator = new PropertyMultiClip(
-      property,
-      [
-        { value: true, soundInfo: checkboxChecked },
-        { value: false, soundInfo: checkboxUnchecked }
-      ],
-      {
-        initialOutputLevel: 0.7
-      }
-    );
-    soundManager.addSoundGenerator( checkboxSoundGenerator );
 
     // Apply additional options
     this.mutate( options );
@@ -225,10 +215,6 @@ define( function( require ) {
         // Client owns enabledProperty, remove the listener that we added.
         self.enabledProperty.unlink( enabledListener );
       }
-
-      // Unhook the sound generator and dispose it.
-      soundManager.removeSoundGenerator( checkboxSoundGenerator );
-      checkboxSoundGenerator.dispose();
 
       // Private to Checkbox, but we need to clean up tandem.
       toggleAction.dispose();

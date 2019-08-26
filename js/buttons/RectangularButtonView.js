@@ -15,6 +15,7 @@ define( require => {
   const ButtonInteractionState = require( 'SUN/buttons/ButtonInteractionState' );
   const Color = require( 'SCENERY/util/Color' );
   const ColorConstants = require( 'SUN/ColorConstants' );
+  const commonSoundPlayers = require( 'TAMBO/commonSoundPlayers' );
   const DerivedProperty = require( 'AXON/DerivedProperty' );
   const inherit = require( 'PHET_CORE/inherit' );
   const LinearGradient = require( 'SCENERY/util/LinearGradient' );
@@ -94,9 +95,9 @@ define( require => {
       // version(s) defined in this file.
       contentAppearanceStrategy: RectangularButtonView.FadeContentWhenDisabled,
 
-      // {Object|null} Strategy for playing a sound when the button fires, null indicates that no sound generation
-      // should occur.  Please see the default in order to understand the API for this strategy object.
-      soundGenerationStrategy: RectangularButtonView.DefaultButtonSoundStrategy,
+      // {Object|null} A sound player, which is an object with a "play()" method for producing sound, or null if no
+      // sound production is desired
+      soundPlayer: commonSoundPlayers.pushButtonSoundPlayer,
 
       // Options that will be passed through to the main input listener (PressListener)
       listenerOptions: null,
@@ -179,9 +180,16 @@ define( require => {
     // Hook up the strategy that will control the content appearance.
     const contentAppearanceStrategy = new options.contentAppearanceStrategy( content, interactionStateProperty, options );
 
-    // Hook up the strategy that will produce the sound (if there is one).
-    if ( options.soundGenerationStrategy ) {
-      var soundGenerationStrategy = new options.soundGenerationStrategy( buttonModel, options.fireOnDown );
+    // If sound production is enabled, hook it up.
+    if ( options.soundPlayer ) {
+
+      var playFiredSound = function( down ) {
+        if ( down && options.fireOnDown || !down && !options.fireOnDown ) {
+          options.soundPlayer.play();
+        }
+      };
+
+      buttonModel.downProperty.lazyLink( playFiredSound );
     }
 
     // Control the pointer state based on the interaction state.
@@ -210,7 +218,7 @@ define( require => {
     this.disposeRectangularButtonView = function() {
       buttonAppearanceStrategy.dispose();
       contentAppearanceStrategy.dispose();
-      soundGenerationStrategy && soundGenerationStrategy.dispose();
+      playFiredSound && buttonModel.downProperty.unlink( playFiredSound );
       this.baseColorProperty.dispose();
       this._pressListener.dispose();
       if ( interactionStateProperty.hasListener( handleInteractionStateChanged ) ) {
@@ -565,31 +573,6 @@ define( require => {
       if ( interactionStateProperty.hasListener( updateOpacity ) ) {
         interactionStateProperty.unlink( updateOpacity );
       }
-    };
-  };
-
-  /**
-   * basic strategy for producing sound when the button is pressed
-   * @param {ButtonModel} buttonModel
-   * @param {boolean} fireOnDown
-   * @constructor
-   * @public
-   */
-  RectangularButtonView.DefaultButtonSoundStrategy = function( buttonModel, fireOnDown ) {
-
-    const buttonSoundPlayer = pushButtonSoundPlayer.getInstance();
-
-    var playFiredSound = function( down ) {
-      if ( down && fireOnDown || !down && !fireOnDown ) {
-        buttonSoundPlayer.play();
-      }
-    };
-
-    buttonModel.downProperty.lazyLink( playFiredSound );
-
-    // dispose function
-    this.dispose = function() {
-      buttonModel.firedEmitter.removeListener( playFiredSound );
     };
   };
 

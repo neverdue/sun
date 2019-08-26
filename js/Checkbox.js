@@ -122,10 +122,10 @@ define( require => {
         if ( self.enabledProperty.value ) {
           const newValue = !property.value;
           toggleAction.execute( newValue );
-          if ( newValue === true && options.checkedSoundPlayer ) {
+          if ( newValue && options.checkedSoundPlayer ) {
             options.checkedSoundPlayer.play();
           }
-          else if ( newValue === false && options.uncheckedSoundPlayer ) {
+          else if ( !newValue && options.uncheckedSoundPlayer ) {
             options.uncheckedSoundPlayer.play();
           }
         }

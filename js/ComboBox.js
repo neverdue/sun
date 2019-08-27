@@ -26,6 +26,7 @@ define( require => {
   const ComboBoxButton = require( 'SUN/ComboBoxButton' );
   const ComboBoxIO = require( 'SUN/ComboBoxIO' );
   const ComboBoxListBox = require( 'SUN/ComboBoxListBox' );
+  const commonSoundPlayers = require( 'TAMBO/commonSoundPlayers' );
   const EventType = require( 'TANDEM/EventType' );
   const InstanceRegistry = require( 'PHET_CORE/documentation/InstanceRegistry' );
   const Node = require( 'SCENERY/nodes/Node' );
@@ -105,6 +106,9 @@ define( require => {
         this.addChild( options.labelNode );
       }
 
+      // sound generation for the button
+      const comboBoxButtonSoundGenerator = new ComboBoxButtonSoundPlayer();
+
       // @private button that shows the current selection
       this.button = new ComboBoxButton( property, items, {
         align: options.align,
@@ -115,6 +119,9 @@ define( require => {
         baseColor: options.buttonFill,
         stroke: options.buttonStroke,
         lineWidth: options.buttonLineWidth,
+
+        // sound generation
+        soundPlayer: comboBoxButtonSoundGenerator,
 
         // a11y - accessibleName and helpText are set via overridden functions on the prototype. See below.
 
@@ -156,6 +163,9 @@ define( require => {
       this.listParent = listParent; // @private
 
       this.mutate( options );
+
+      // connect the sound generator to the list box
+      comboBoxButtonSoundGenerator.setListBox( this.listBox );
 
       // Clicking on the button toggles visibility of the list box
       this.button.addListener( () => {
@@ -353,6 +363,42 @@ define( require => {
         this.listBox.left = pButtonLocal.x;
         this.listBox.top = pButtonLocal.y;
       }
+    }
+  }
+
+  class ComboBoxButtonSoundPlayer {
+
+    /**
+     *
+     * @param {Node|null} listBox - the visibility is used to decide which sound to play, can be set post-construction
+     * if necessary
+     */
+    constructor( listBox = null ) {
+
+      // @private
+      this.listBox = listBox;
+      this.comboBoxOpenSoundPlayer = commonSoundPlayers.comboBoxOpenSoundPlayer;
+      this.comboBoxCloseSoundPlayer = commonSoundPlayers.comboBoxCloseSoundPlayer;
+    }
+
+    /**
+     * play the appropriate sound for the combo box opening or closing
+     * @public
+     */
+    play() {
+      assert && assert( this.listBox, 'listBox must be set before play can be called' );
+      this.listBox.visible ? this.comboBoxOpenSoundPlayer.play() : this.comboBoxCloseSoundPlayer.play();
+    }
+
+    /**
+     * set the list box - this is generally used if order dependences prevent the list box from being available when
+     * this sound player is initially constructed
+     * @param {Node} listBox
+     * @public
+     */
+    setListBox( listBox ) {
+      assert && assert( !this.listBox, 'the list box should only be set once' );
+      this.listBox = listBox;
     }
   }
 

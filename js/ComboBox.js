@@ -377,8 +377,8 @@ define( require => {
 
       // @private
       this.listBox = listBox;
-      this.comboBoxOpenSoundPlayer = commonSoundPlayers.comboBoxOpen;
-      this.comboBoxCloseSoundPlayer = commonSoundPlayers.comboBoxClose;
+      this.comboBoxOpenSoundPlayer = commonSoundPlayers.comboBoxOpenSoundPlayer;
+      this.comboBoxCloseSoundPlayer = commonSoundPlayers.comboBoxCloseSoundPlayer;
     }
 
     /**

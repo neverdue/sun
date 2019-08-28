@@ -55,8 +55,8 @@ define( function( require ) {
       phetioComponentOptions: null, // filled in below with PhetioObject.mergePhetioComponentOptions()
 
       // sound options, can replace with a custom sound player or set to null to disable sound production
-      checkedSoundPlayer: commonSoundPlayers.checkboxCheckedSoundPlayer,
-      uncheckedSoundPlayer: commonSoundPlayers.checkboxUncheckedSoundPlayer,
+      checkedSoundPlayer: commonSoundPlayers.checkboxChecked,
+      uncheckedSoundPlayer: commonSoundPlayers.checkboxUnchecked,
 
       // a11y
       tagName: 'input',

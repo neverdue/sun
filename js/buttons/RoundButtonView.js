@@ -86,7 +86,7 @@ define( require => {
 
       // {Object|null} A sound player, which is an object with a "play()" method for producing sound, or null if no
       // sound production is desired
-      soundPlayer: commonSoundPlayers.pushButtonSoundPlayer,
+      soundPlayer: commonSoundPlayers.pushButton,
 
       // Options that will be passed through to the main input listener (PressListener)
       listenerOptions: null,

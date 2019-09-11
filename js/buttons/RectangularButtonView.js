@@ -181,23 +181,11 @@ define( require => {
     const contentAppearanceStrategy = new options.contentAppearanceStrategy( content, interactionStateProperty, options );
 
     // If sound production is enabled, hook it up.
-    var playFiredSound;
     if ( options.soundPlayer ) {
-
-      if ( buttonModel.firedEmitter ) {
-        playFiredSound = function() {
-          options.soundPlayer.play();
-        };
-        buttonModel.firedEmitter.addListener( playFiredSound );
-      }
-      else {
-        playFiredSound = function( down ) {
-          if ( down && options.fireOnDown || !down && !options.fireOnDown ) {
-            options.soundPlayer.play();
-          }
-        };
-        buttonModel.downProperty.lazyLink( playFiredSound );
-      }
+      var playSound = function() {
+        options.soundPlayer.play();
+      };
+      buttonModel.produceSoundEmitter.addListener( playSound );
     }
 
     // Control the pointer state based on the interaction state.
@@ -226,13 +214,8 @@ define( require => {
     this.disposeRectangularButtonView = function() {
       buttonAppearanceStrategy.dispose();
       contentAppearanceStrategy.dispose();
-      if ( playFiredSound ) {
-        if ( buttonModel.firedEmitter ) {
-          buttonModel.firedEmitter.removeListener( playFiredSound );
-        }
-        else {
-          buttonModel.downProperty.unlink( playFiredSound );
-        }
+      if ( options.soundPlayer ) {
+        buttonModel.produceSoundEmitter.removeListener( playSound );
       }
       this.baseColorProperty.dispose();
       this._pressListener.dispose();

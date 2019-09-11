@@ -9,6 +9,7 @@ define( require => {
 
   // modules
   const BooleanProperty = require( 'AXON/BooleanProperty' );
+  const Emitter = require( 'AXON/Emitter' );
   const inherit = require( 'PHET_CORE/inherit' );
   const PhetioObject = require( 'TANDEM/PhetioObject' );
   const PressListener = require( 'SCENERY/listeners/PressListener' );
@@ -24,6 +25,7 @@ define( require => {
     const self = this;
 
     options = _.extend( {
+
       // {function()} called on pointer down
       startCallback: _.noop,
       // {function(over:boolean)} called on pointer up, @param {boolean} over - indicates whether the pointer was released over the button
@@ -54,9 +56,11 @@ define( require => {
       phetioFeatured: true
     }, options.enabledPropertyOptions );
 
-    // model properties
-    this.overProperty = new BooleanProperty( false ); // @public - Is the pointer over the button?
-    this.downProperty = new BooleanProperty( false, { reentrant: true } ); // @public - Is the pointer down?
+    // @public (read-only) - true if the pointer is over the button
+    this.overProperty = new BooleanProperty( false );
+
+    // @public (read-only) - true if the pointer is down
+    this.downProperty = new BooleanProperty( false, { reentrant: true } );
 
     // @protected (read-only) - Is the button being clicked because of accessibility (like keyboard)?
     // See PressListener.a11yClickingProperty
@@ -70,6 +74,9 @@ define( require => {
 
     // @public - Is the button enabled?
     this.enabledProperty = new BooleanProperty( options.enabled, options.enabledPropertyOptions );
+
+    // @public (read-only by users, read-write in subclasses) - emitter that is fired when sound should be produced
+    this.produceSoundEmitter = new Emitter();
 
     // @private - keep track of and store all listeners this model creates
     this.listeners = [];

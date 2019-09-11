@@ -78,6 +78,9 @@ define( require => {
           if ( self.timer ) {
             self.timer.start();
           }
+          if ( options.fireOnDown || self.timer ) {
+            self.produceSoundEmitter.emit();
+          }
         }
       }
       else {
@@ -87,6 +90,7 @@ define( require => {
         }
         else if ( fire ) {
           self.fire();
+          self.produceSoundEmitter.emit();
         }
       }
     };

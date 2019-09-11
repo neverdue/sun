@@ -83,6 +83,7 @@ define( require => {
     // @public
     toggle: function() {
       this.toggledEmitter.emit();
+      this.produceSoundEmitter.emit();
     }
   } );
 } );

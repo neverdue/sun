@@ -150,23 +150,11 @@ define( function( require ) {
     var contentAppearanceStrategy = new options.contentAppearanceStrategy( content, interactionStateProperty );
 
     // If sound production is enabled, hook it up.
-    var playFiredSound;
     if ( options.soundPlayer ) {
-
-      if ( pushButtonModel.firedEmitter ) {
-        playFiredSound = function() {
-          options.soundPlayer.play();
-        };
-        pushButtonModel.firedEmitter.addListener( playFiredSound );
-      }
-      else {
-        playFiredSound = function( down ) {
-          if ( down && options.fireOnDown || !down && !options.fireOnDown ) {
-            options.soundPlayer.play();
-          }
-        };
-        pushButtonModel.downProperty.lazyLink( playFiredSound );
-      }
+      var playSound = function() {
+        options.soundPlayer.play();
+      };
+      pushButtonModel.produceSoundEmitter.addListener( playSound );
     }
 
     // Control the pointer state based on the interaction state.
@@ -203,13 +191,8 @@ define( function( require ) {
       if ( interactionStateProperty.hasListener( handleInteractionStateChanged ) ) {
         interactionStateProperty.unlink( handleInteractionStateChanged );
       }
-      if ( playFiredSound ) {
-        if ( pushButtonModel.firedEmitter ) {
-          pushButtonModel.firedEmitter.removeListener( playFiredSound );
-        }
-        else {
-          pushButtonModel.downProperty.unlink( playFiredSound );
-        }
+      if ( options.soundPlayer ) {
+        pushButtonModel.produceSoundEmitter.removeListener( playSound );
       }
       this.baseColorProperty.dispose();
     };

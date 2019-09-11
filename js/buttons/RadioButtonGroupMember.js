@@ -148,6 +148,13 @@ define( function( require ) {
     fire: function() {
       if ( this.buttonModel.enabledProperty.get() ) {
         this.firedEmitter.emit();
+
+        // TODO: I (jbphet) added the following emit in mid-Sept 2019 as a way to trigger sound emission from this
+        // button type.  It may or may not be a good way to do this going forward, but it allows the sound behavior to
+        // be demonstrated, and this type is likely to get significantly restructured soon due to
+        // https://github.com/phetsims/sun/issues/523, so I didn't want to spend too much time on it.  This should be
+        // revisited when the work for that issue is being done.
+        this.buttonModel.produceSoundEmitter.emit();
       }
     },
 

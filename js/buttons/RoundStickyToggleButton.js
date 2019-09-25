@@ -12,6 +12,7 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var commonSoundPlayers = require( 'TAMBO/commonSoundPlayers' );
   var inherit = require( 'PHET_CORE/inherit' );
   var RoundButtonView = require( 'SUN/buttons/RoundButtonView' );
   var StickyToggleButtonInteractionStateProperty = require( 'SUN/buttons/StickyToggleButtonInteractionStateProperty' );
@@ -30,8 +31,17 @@ define( function( require ) {
   function RoundStickyToggleButton( valueUp, valueDown, property, options ) {
 
     options = _.extend( {
+
+      // turn off default sound, since this type will do its own sound generation
+      soundPlayer: null,
+
+      // sounds to be played on toggle transitions,
+      valueUpSound: commonSoundPlayers.stepForwardButton,
+      valueDownSound: commonSoundPlayers.stepBackwardButton,
+
       tandem: Tandem.required,
       phetioType: ToggleButtonIO
+
     }, options );
 
     // @private (read-only)
@@ -40,8 +50,21 @@ define( function( require ) {
     var stickyToggleButtonInteractionStateProperty = new StickyToggleButtonInteractionStateProperty( toggleButtonModel );
     RoundButtonView.call( this, toggleButtonModel, stickyToggleButtonInteractionStateProperty, options );
 
+    // sound generation
+    function playSounds() {
+      if ( property.value === valueDown && options.valueDownSound ) {
+        options.valueDownSound.play();
+      }
+      else if ( property.value === valueUp && options.valueUpSound ) {
+        options.valueUpSound.play();
+      }
+    }
+
+    this.buttonModel.produceSoundEmitter.addListener( playSounds );
+
     // @private - dispose items specific to this instance
     this.disposeRoundStickyToggleButton = function() {
+      this.buttonModel.produceSoundEmitter.removeListener( playSounds );
       toggleButtonModel.dispose();
       stickyToggleButtonInteractionStateProperty.dispose();
     };

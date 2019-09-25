@@ -80,7 +80,9 @@ define( function( require ) {
         }
       }
       else {
-        var fire = ( !options.fireOnDown && self.overProperty.get() && self.enabledProperty.get() ); // should the button fire?
+
+        // should the button fire?
+        var fire = ( !options.fireOnDown && self.overProperty.get() && self.enabledProperty.get() && !self.interrupted );
         if ( self.timer ) {
           self.timer.stop( fire );
         }

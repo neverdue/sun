@@ -10,6 +10,7 @@ define( require => {
   'use strict';
 
   // modules
+  const commonSoundPlayers = require( 'TAMBO/commonSoundPlayers' );
   const inherit = require( 'PHET_CORE/inherit' );
   const RoundButtonView = require( 'SUN/buttons/RoundButtonView' );
   const sun = require( 'SUN/sun' );
@@ -27,10 +28,19 @@ define( require => {
    */
   function RoundToggleButton( valueOff, valueOn, property, options ) {
 
-    // Tandem support
     options = _.extend( {
+
+      // turn off default sound, since this type will do its own sound generation
+      soundPlayer: null,
+
+      // sounds to be played on toggle transitions,
+      valueOffSound: commonSoundPlayers.stepForwardButton,
+      valueOnSound: commonSoundPlayers.stepBackwardButton,
+
+      // tandem support
       tandem: Tandem.required,
       phetioType: ToggleButtonIO
+
     }, options );
 
     // @private (read-only)
@@ -40,12 +50,25 @@ define( require => {
 
     RoundButtonView.call( this, this.toggleButtonModel, toggleButtonInteractionStateProperty, options );
 
+    // sound generation
+    function playSounds() {
+      if ( property.value === valueOff && options.valueOffSound ) {
+        options.valueOffSound.play();
+      }
+      else if ( property.value === valueOn && options.valueOnSound ) {
+        options.valueOnSound.play();
+      }
+    }
+
+    this.buttonModel.produceSoundEmitter.addListener( playSounds );
+
     this.addLinkedElement( property, {
       tandem: options.tandem.createTandem( 'property' )
     } );
 
     // @private
     this.disposeRoundToggleButton = function() {
+      this.buttonModel.produceSoundEmitter.removeListener( playSounds );
       this.toggleButtonModel.dispose();
       toggleButtonInteractionStateProperty.dispose();
     };

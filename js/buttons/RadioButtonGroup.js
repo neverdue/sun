@@ -28,8 +28,6 @@ define( require => {
   const radioButtonSoundPlayerFactory = require( 'TAMBO/radioButtonSoundPlayerFactory' );
   const Rectangle = require( 'SCENERY/nodes/Rectangle' );
   const Shape = require( 'KITE/Shape' );
-  const SoundClip = require( 'TAMBO/sound-generators/SoundClip' );
-  const soundManager = require( 'TAMBO/soundManager' );
   const sun = require( 'SUN/sun' );
   const Tandem = require( 'TANDEM/Tandem' );
 

@@ -17,7 +17,6 @@ define( require => {
   const ButtonInteractionState = require( 'SUN/buttons/ButtonInteractionState' );
   const Circle = require( 'SCENERY/nodes/Circle' );
   const ColorConstants = require( 'SUN/ColorConstants' );
-  const commonSoundPlayers = require( 'TAMBO/commonSoundPlayers' );
   const DerivedProperty = require( 'AXON/DerivedProperty' );
   const inherit = require( 'PHET_CORE/inherit' );
   const Node = require( 'SCENERY/nodes/Node' );
@@ -84,10 +83,6 @@ define( require => {
       // version(s) defined in this file.
       contentAppearanceStrategy: RoundButtonView.FadeContentWhenDisabled,
 
-      // {Object|null} A sound player, which is an object with a "play()" method for producing sound, or null if no
-      // sound production is desired
-      soundPlayer: commonSoundPlayers.pushButton,
-
       // Options that will be passed through to the main input listener (PressListener)
       listenerOptions: null,
 
@@ -149,14 +144,6 @@ define( require => {
     // Hook up the strategy that will control the content appearance.
     const contentAppearanceStrategy = new options.contentAppearanceStrategy( content, interactionStateProperty );
 
-    // If sound production is enabled, hook it up.
-    if ( options.soundPlayer ) {
-      var playSound = function() {
-        options.soundPlayer.play();
-      };
-      pushButtonModel.produceSoundEmitter.addListener( playSound );
-    }
-
     // Control the pointer state based on the interaction state.
     const self = this;
 
@@ -190,9 +177,6 @@ define( require => {
       pressListener.dispose();
       if ( interactionStateProperty.hasListener( handleInteractionStateChanged ) ) {
         interactionStateProperty.unlink( handleInteractionStateChanged );
-      }
-      if ( options.soundPlayer ) {
-        pushButtonModel.produceSoundEmitter.removeListener( playSound );
       }
       this.baseColorProperty.dispose();
     };

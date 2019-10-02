@@ -37,7 +37,6 @@ define( require => {
       // tandem support
       tandem: Tandem.required,
       phetioType: ToggleButtonIO
-
     }, options );
 
     // @private (read-only)
@@ -48,15 +47,14 @@ define( require => {
     RoundButtonView.call( this, this.toggleButtonModel, toggleButtonInteractionStateProperty, options );
 
     // sound generation
-    function playSounds() {
+    const playSounds = () => {
       if ( property.value === valueOff && options.valueOffSound ) {
         options.valueOffSound.play();
       }
       else if ( property.value === valueOn && options.valueOnSound ) {
         options.valueOnSound.play();
       }
-    }
-
+    };
     this.buttonModel.produceSoundEmitter.addListener( playSounds );
 
     this.addLinkedElement( property, {
@@ -64,7 +62,7 @@ define( require => {
     } );
 
     // @private
-    this.disposeRoundToggleButton = function() {
+    this.disposeRoundToggleButton = () => {
       this.buttonModel.produceSoundEmitter.removeListener( playSounds );
       this.toggleButtonModel.dispose();
       toggleButtonInteractionStateProperty.dispose();

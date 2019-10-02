@@ -14,6 +14,7 @@ define( require => {
   const ButtonModel = require( 'SUN/buttons/ButtonModel' );
   const Color = require( 'SCENERY/util/Color' );
   const ColorConstants = require( 'SUN/ColorConstants' );
+  const commonSoundPlayers = require( 'TAMBO/commonSoundPlayers' );
   const Emitter = require( 'AXON/Emitter' );
   const EventType = require( 'TANDEM/EventType' );
   const inherit = require( 'PHET_CORE/inherit' );
@@ -63,8 +64,8 @@ define( require => {
       buttonAppearanceStrategy: RadioButtonGroupAppearance.defaultRadioButtonsAppearance,
       contentAppearanceStrategy: RadioButtonGroupAppearance.contentAppearanceStrategy,
 
-      // The sound generation will be handled in the parent group type, so disable the default.
-      soundGenerationStrategy: null,
+      // {Playble|null} a sound player or null if no sound production is desired
+      soundPlayer: commonSoundPlayers.pushButton,
 
       // a11y
       tagName: 'input',
@@ -97,7 +98,7 @@ define( require => {
 
     RectangularButtonView.call( this, this.buttonModel, this.interactionStateProperty, options );
 
-    // a11y - Specify the default value for assistive technology, this attribute is needed in addition to 
+    // a11y - Specify the default value for assistive technology, this attribute is needed in addition to
     // the 'checked' property to mark this element as the default selection since 'checked' may be set before
     // we are finished adding RadioButtonGroupMembers to the RadioButtonGroup.
     if ( property.value === value ) {
@@ -129,9 +130,19 @@ define( require => {
       property.set( value );
     } );
 
+    // If sound production is enabled, hook it up.
+    let playSound;
+    if ( options.soundPlayer ) {
+      playSound = () => { options.soundPlayer.play(); };
+      this.buttonModel.produceSoundEmitter.addListener( playSound );
+    }
+
     // @private
     this.disposeRadioButtonGroupMember = function() {
       property.unlink( accessibleCheckedListener );
+      if ( options.soundPlayer ) {
+        this.buttonModel.produceSoundEmitter.removeListener( playSound );
+      }
       this.firedEmitter.dispose();
       this.buttonModel.dispose();
       this.interactionStateProperty.dispose();

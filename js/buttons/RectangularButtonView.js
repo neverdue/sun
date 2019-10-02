@@ -15,7 +15,6 @@ define( require => {
   const ButtonInteractionState = require( 'SUN/buttons/ButtonInteractionState' );
   const Color = require( 'SCENERY/util/Color' );
   const ColorConstants = require( 'SUN/ColorConstants' );
-  const commonSoundPlayers = require( 'TAMBO/commonSoundPlayers' );
   const DerivedProperty = require( 'AXON/DerivedProperty' );
   const inherit = require( 'PHET_CORE/inherit' );
   const LinearGradient = require( 'SCENERY/util/LinearGradient' );
@@ -94,10 +93,6 @@ define( require => {
       // or custom.  To create a custom one, model it off of the stock
       // version(s) defined in this file.
       contentAppearanceStrategy: RectangularButtonView.FadeContentWhenDisabled,
-
-      // {Object|null} A sound player, which is an object with a "play()" method for producing sound, or null if no
-      // sound production is desired
-      soundPlayer: commonSoundPlayers.pushButton,
 
       // Options that will be passed through to the main input listener (PressListener)
       listenerOptions: null,
@@ -180,14 +175,6 @@ define( require => {
     // Hook up the strategy that will control the content appearance.
     const contentAppearanceStrategy = new options.contentAppearanceStrategy( content, interactionStateProperty, options );
 
-    // If sound production is enabled, hook it up.
-    if ( options.soundPlayer ) {
-      var playSound = function() {
-        options.soundPlayer.play();
-      };
-      buttonModel.produceSoundEmitter.addListener( playSound );
-    }
-
     // Control the pointer state based on the interaction state.
     const self = this;
 
@@ -214,9 +201,6 @@ define( require => {
     this.disposeRectangularButtonView = function() {
       buttonAppearanceStrategy.dispose();
       contentAppearanceStrategy.dispose();
-      if ( options.soundPlayer ) {
-        buttonModel.produceSoundEmitter.removeListener( playSound );
-      }
       this.baseColorProperty.dispose();
       this._pressListener.dispose();
       if ( interactionStateProperty.hasListener( handleInteractionStateChanged ) ) {

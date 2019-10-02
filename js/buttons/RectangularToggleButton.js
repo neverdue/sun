@@ -10,6 +10,7 @@ define( require => {
   'use strict';
 
   // modules
+  const commonSoundPlayers = require( 'TAMBO/commonSoundPlayers' );
   const inherit = require( 'PHET_CORE/inherit' );
   const RectangularButtonView = require( 'SUN/buttons/RectangularButtonView' );
   const sun = require( 'SUN/sun' );
@@ -28,6 +29,12 @@ define( require => {
   function RectangularToggleButton( valueOff, valueOn, property, options ) {
 
     options = _.extend( {
+
+      // {Playable} - sounds to be played on toggle transitions
+      valueOffSound: commonSoundPlayers.stepForwardButton,
+      valueOnSound: commonSoundPlayers.stepBackwardButton,
+
+      // tandem support
       tandem: Tandem.required,
       phetioType: ToggleButtonIO
     }, options );
@@ -42,8 +49,20 @@ define( require => {
       tandem: options.tandem.createTandem( 'property' )
     } );
 
+    // sound generation
+    const playSounds = () => {
+      if ( property.value === valueOff && options.valueOffSound ) {
+        options.valueOffSound.play();
+      }
+      else if ( property.value === valueOn && options.valueOnSound ) {
+        options.valueOnSound.play();
+      }
+    };
+    this.buttonModel.produceSoundEmitter.addListener( playSounds );
+
     // @private
-    this.disposeRectangularToggleButton = function() {
+    this.disposeRectangularToggleButton = () => {
+      this.buttonModel.produceSoundEmitter.removeListener( playSounds );
       toggleButtonInteractionStateProperty.dispose();
     };
   }

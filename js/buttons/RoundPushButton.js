@@ -14,6 +14,7 @@ define( require => {
   'use strict';
 
   // modules
+  const commonSoundPlayers = require( 'TAMBO/commonSoundPlayers' );
   const inherit = require( 'PHET_CORE/inherit' );
   const InstanceRegistry = require( 'PHET_CORE/documentation/InstanceRegistry' );
   const PushButtonInteractionStateProperty = require( 'SUN/buttons/PushButtonInteractionStateProperty' );
@@ -29,6 +30,10 @@ define( require => {
   function RoundPushButton( options ) {
 
     options = _.extend( {
+
+      // {Playble|null} a sound player or null if no sound production is desired
+      soundPlayer: commonSoundPlayers.pushButton,
+
       tandem: Tandem.required
     }, options );
 
@@ -48,7 +53,17 @@ define( require => {
     // add the listener that was potentially saved above
     listener && this.addListener( listener );
 
+    // If sound production is enabled, hook it up.
+    let playSound;
+    if ( options.soundPlayer ) {
+      playSound = () => { options.soundPlayer.play(); };
+      this.buttonModel.produceSoundEmitter.addListener( playSound );
+    }
+
     this.disposeRoundPushButton = function() {
+      if ( options.soundPlayer ) {
+        this.buttonModel.produceSoundEmitter.removeListener( playSound );
+      }
       self.buttonModel.dispose();
     };
 

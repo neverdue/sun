@@ -12,6 +12,7 @@ define( require => {
   'use strict';
 
   // modules
+  const commonSoundPlayers = require( 'TAMBO/commonSoundPlayers' );
   const inherit = require( 'PHET_CORE/inherit' );
   const InstanceRegistry = require( 'PHET_CORE/documentation/InstanceRegistry' );
   const PushButtonInteractionStateProperty = require( 'SUN/buttons/PushButtonInteractionStateProperty' );
@@ -27,6 +28,11 @@ define( require => {
   function RectangularPushButton( options ) {
 
     options = _.extend( {
+
+      // {Playble|null} a sound player or null if no sound production is desired
+      soundPlayer: commonSoundPlayers.pushButton,
+
+      // tandem support
       tandem: Tandem.required
     }, options );
 
@@ -46,7 +52,17 @@ define( require => {
     // Call the parent type
     RectangularButtonView.call( this, this.buttonModel, new PushButtonInteractionStateProperty( this.buttonModel ), options );
 
+    // If sound production is enabled, hook it up.
+    let playSound;
+    if ( options.soundPlayer ) {
+      playSound = () => { options.soundPlayer.play(); };
+      this.buttonModel.produceSoundEmitter.addListener( playSound );
+    }
+
     this.disposeRectangularPushButton = function() {
+      if ( options.soundPlayer ) {
+        this.buttonModel.produceSoundEmitter.removeListener( playSound );
+      }
       this.buttonModel.dispose(); //TODO this fails when assertions are enabled, see sun#212
     };
 

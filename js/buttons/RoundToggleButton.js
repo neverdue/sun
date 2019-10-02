@@ -30,10 +30,7 @@ define( function( require ) {
 
     options = _.extend( {
 
-      // turn off default sound, since this type will do its own sound generation
-      soundPlayer: null,
-
-      // {Playable} - sounds to be played on toggle transitions,
+      // {Playable} - sounds to be played on toggle transitions
       valueOffSound: commonSoundPlayers.stepForwardButton,
       valueOnSound: commonSoundPlayers.stepBackwardButton,
 

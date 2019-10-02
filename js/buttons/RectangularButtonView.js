@@ -15,7 +15,6 @@ define( function( require ) {
   var ButtonInteractionState = require( 'SUN/buttons/ButtonInteractionState' );
   var Color = require( 'SCENERY/util/Color' );
   var ColorConstants = require( 'SUN/ColorConstants' );
-  var commonSoundPlayers = require( 'TAMBO/commonSoundPlayers' );
   var DerivedProperty = require( 'AXON/DerivedProperty' );
   var inherit = require( 'PHET_CORE/inherit' );
   var LinearGradient = require( 'SCENERY/util/LinearGradient' );
@@ -94,10 +93,6 @@ define( function( require ) {
       // or custom.  To create a custom one, model it off of the stock
       // version(s) defined in this file.
       contentAppearanceStrategy: RectangularButtonView.FadeContentWhenDisabled,
-
-      // {Object|null} A sound player, which is an object with a "play()" method for producing sound, or null if no
-      // sound production is desired
-      soundPlayer: commonSoundPlayers.pushButton,
 
       // Options that will be passed through to the main input listener (PressListener)
       listenerOptions: null,
@@ -180,14 +175,6 @@ define( function( require ) {
     // Hook up the strategy that will control the content appearance.
     var contentAppearanceStrategy = new options.contentAppearanceStrategy( content, interactionStateProperty, options );
 
-    // If sound production is enabled, hook it up.
-    if ( options.soundPlayer ) {
-      var playSound = function() {
-        options.soundPlayer.play();
-      };
-      buttonModel.produceSoundEmitter.addListener( playSound );
-    }
-
     // Control the pointer state based on the interaction state.
     var self = this;
 
@@ -214,9 +201,6 @@ define( function( require ) {
     this.disposeRectangularButtonView = function() {
       buttonAppearanceStrategy.dispose();
       contentAppearanceStrategy.dispose();
-      if ( options.soundPlayer ) {
-        buttonModel.produceSoundEmitter.removeListener( playSound );
-      }
       this.baseColorProperty.dispose();
       this._pressListener.dispose();
       if ( interactionStateProperty.hasListener( handleInteractionStateChanged ) ) {

@@ -14,6 +14,7 @@ define( require => {
   const BooleanProperty = require( 'AXON/BooleanProperty' );
   const ButtonListener = require( 'SCENERY/input/ButtonListener' );
   const commonSoundPlayers = require( 'TAMBO/commonSoundPlayers' );
+  const checkboxCheckedSound = require( 'TAMBO/shared-sound-players/checkboxCheckedSound' );
   const EventType = require( 'TANDEM/EventType' );
   const FontAwesomeNode = require( 'SUN/FontAwesomeNode' );
   const inherit = require( 'PHET_CORE/inherit' );
@@ -55,7 +56,7 @@ define( require => {
       phetioComponentOptions: null, // filled in below with PhetioObject.mergePhetioComponentOptions()
 
       // sound options, can replace with a custom sound player or set to null to disable sound production
-      checkedSoundPlayer: commonSoundPlayers.checkboxChecked,
+      checkedSoundPlayer: checkboxCheckedSound.soundClip,
       uncheckedSoundPlayer: commonSoundPlayers.checkboxUnchecked,
 
       // a11y

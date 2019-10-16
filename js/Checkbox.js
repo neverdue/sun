@@ -13,8 +13,6 @@ define( require => {
   const BooleanIO = require( 'TANDEM/types/BooleanIO' );
   const BooleanProperty = require( 'AXON/BooleanProperty' );
   const ButtonListener = require( 'SCENERY/input/ButtonListener' );
-  const commonSoundPlayers = require( 'TAMBO/commonSoundPlayers' );
-  const checkboxCheckedSound = require( 'TAMBO/shared-sound-players/checkboxCheckedSound' );
   const EventType = require( 'TANDEM/EventType' );
   const FontAwesomeNode = require( 'SUN/FontAwesomeNode' );
   const inherit = require( 'PHET_CORE/inherit' );
@@ -28,6 +26,10 @@ define( require => {
 
   // constants
   const ENABLED_PROPERTY_TANDEM_NAME = 'enabledProperty';
+
+  // sounds
+  const checkboxCheckedSound = require( 'TAMBO/shared-sound-players/checkboxCheckedSound' );
+  const checkboxUncheckedSound = require( 'TAMBO/shared-sound-players/checkboxUncheckedSound' );
 
   /**
    * @param {Node} content
@@ -57,7 +59,7 @@ define( require => {
 
       // sound options, can replace with a custom sound player or set to null to disable sound production
       checkedSoundPlayer: checkboxCheckedSound.soundClip,
-      uncheckedSoundPlayer: commonSoundPlayers.checkboxUnchecked,
+      uncheckedSoundPlayer: checkboxUncheckedSound.soundClip,
 
       // a11y
       tagName: 'input',

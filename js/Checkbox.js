@@ -19,6 +19,7 @@ define( require => {
   const InstanceRegistry = require( 'PHET_CORE/documentation/InstanceRegistry' );
   const Node = require( 'SCENERY/nodes/Node' );
   const PhetioObject = require( 'TANDEM/PhetioObject' );
+  const Playable = require( 'TAMBO/Playable' );
   const Rectangle = require( 'SCENERY/nodes/Rectangle' );
   const sun = require( 'SUN/sun' );
   const SunConstants = require( 'SUN/SunConstants' );
@@ -57,9 +58,9 @@ define( require => {
       phetioLinkProperty: true, // whether a link to the checkbox's Property is created
       phetioComponentOptions: null, // filled in below with PhetioObject.mergePhetioComponentOptions()
 
-      // sound options, can replace with a custom sound player or set to null to disable sound production
-      checkedSoundPlayer: checkboxCheckedSound.soundClip,
-      uncheckedSoundPlayer: checkboxUncheckedSound.soundClip,
+      // {Playable|null} - sound generators, if set to null defaults will be used, set to Playable.NO_SOUND to disable
+      checkedSoundPlayer: null,
+      uncheckedSoundPlayer: null,
 
       // a11y
       tagName: 'input',
@@ -117,16 +118,24 @@ define( require => {
 
     content.pickable = false; // since there's a pickable rectangle on top of content
 
+    // get default sound generators if needed
+    if ( options.checkedSoundPlayer === null ) {
+      options.checkedSoundPlayer = checkboxCheckedSound.soundClip;
+    }
+    if ( options.uncheckedSoundPlayer === null ) {
+      options.uncheckedSoundPlayer = checkboxUncheckedSound.soundClip;
+    }
+
     // interactivity
     const checkboxButtonListener = new ButtonListener( {
       fire: function() {
         if ( self.enabledProperty.value ) {
           const newValue = !property.value;
           toggleAction.execute( newValue );
-          if ( newValue && options.checkedSoundPlayer ) {
+          if ( newValue && Playable.isPlayable( options.checkedSoundPlayer ) ) {
             options.checkedSoundPlayer.play();
           }
-          else if ( !newValue && options.uncheckedSoundPlayer ) {
+          else if ( !newValue && Playable.isPlayable( options.uncheckedSoundPlayer ) ) {
             options.uncheckedSoundPlayer.play();
           }
         }
